@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">AndroidLabs</string>
+    <string name="i_am_button">I am Button</string>
+    <string name="i_m_button">I\'m button</string>
+    <string name="Login">Login</string>
 </resources>
