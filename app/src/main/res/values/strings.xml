@@ -3,4 +3,7 @@
     <string name="i_am_button">I am Button</string>
     <string name="i_m_button">I\'m button</string>
     <string name="Login">Login</string>
+    <string name="send">Send</string>
+    <string name="receive">Receive</string>
+    <string name="hint_enter_a_message">enter a message</string>
 </resources>

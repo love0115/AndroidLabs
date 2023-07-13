@@ -127,7 +127,7 @@ public class MainActivityTest2 {
 //find the view
         ViewInteraction appCompatEditText = onView( withId(R.id.EditText) );
 //type in password123#$*
-        appCompatEditText.perform(replaceText("Password123#$*"));
+        appCompatEditText.perform(replaceText("password123#$*"));
 //find the button
         ViewInteraction materialButton = onView (withId(R.id.button1) );
 //click the button
