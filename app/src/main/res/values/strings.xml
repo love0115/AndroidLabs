@@ -6,4 +6,5 @@
     <string name="send">Send</string>
     <string name="receive">Receive</string>
     <string name="hint_enter_a_message">enter a message</string>
+    <string name="hint_enter_a_tablet">eneter message tablet</string>
 </resources>

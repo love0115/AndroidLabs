@@ -1,17 +1,25 @@
 package algonquin.cst2335.androidlabs;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import algonquin.cst2335.androidlabs.databinding.ActivityChatRoomBinding;
 
@@ -21,8 +29,11 @@ public class ChatRoom extends AppCompatActivity {
     private ArrayList<ChatMessage> messages;
     private ChatRoomViewModel chatRoomViewModel;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        MessageDatabase db = Room.databaseBuilder(getApplicationContext(), MessageDatabase.class, "database-name").build();
+        ChatMessageDAO mDAO = db.cmDAO();
         super.onCreate(savedInstanceState);
         binding = ActivityChatRoomBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -33,9 +44,22 @@ public class ChatRoom extends AppCompatActivity {
             chatRoomViewModel.messages.setValue(new ArrayList<ChatMessage>());
         }
         messages = chatRoomViewModel.messages.getValue();
+        if(messages == null)
+        {
+            chatRoomViewModel.messages.setValue(messages = new ArrayList<>());
+
+            Executor thread = Executors.newSingleThreadExecutor();
+            thread.execute(() ->
+            {
+                messages.addAll( mDAO.getAllMessages() ); //Once you get the data from database
+
+                runOnUiThread( () ->  binding.rvList.setAdapter( adapter )); //You can then load the RecyclerView
+            });
+        }
 
         binding.rvList.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ChatRoomAdapter(messages);
+        adapter = new ChatRoomAdapter(ChatRoom.this,messages);
+
         binding.rvList.setAdapter(adapter);
 
         binding.btnSend.setOnClickListener(new View.OnClickListener() {
@@ -70,4 +94,5 @@ public class ChatRoom extends AppCompatActivity {
         String currentDateandTime = sdf.format(new Date());
         return currentDateandTime;
     }
-}
+
+    }
