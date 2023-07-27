@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- TextView 1 -->
+    <TextView
+        android:id="@+id/messagetxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Message goes here"
+        android:layout_marginTop="32dp"
+        android:layout_marginLeft="32dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <!-- TextView 2 -->
+    <TextView
+        android:id="@+id/timetxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time goes here"
+        android:layout_marginTop="32dp"
+        android:layout_marginLeft="32dp"
+        app:layout_constraintTop_toBottomOf="@id/messagetxt"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <!-- TextView 3 -->
+    <TextView
+        android:id="@+id/sendreceivetxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="send receive goes here"
+        android:layout_marginTop="32dp"
+        android:layout_marginLeft="32dp"
+        app:layout_constraintTop_toBottomOf="@id/timetxt"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <!-- TextView 4 -->
+    <TextView
+        android:id="@+id/idtxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="database id goes here"
+        android:layout_marginTop="32dp"
+        android:layout_marginLeft="32dp"
+        app:layout_constraintTop_toBottomOf="@id/sendreceivetxt"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,8 +29,14 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.MyRowH
     private Context context;
     private ChatMessageDAO mDAO;
 
+    private ChatRoomViewModel chatRoomViewModel;
 
-    ChatRoomAdapter(Context context,ArrayList<ChatMessage> messages) {
+
+
+
+    ChatRoomAdapter(Context context,ArrayList<ChatMessage> messages,ChatRoomViewModel chatRoomViewModel)
+    {
+        this.chatRoomViewModel=chatRoomViewModel;
         this.messages = messages;
         this.context=context;
         MessageDatabase db = Room.databaseBuilder(context.getApplicationContext(), MessageDatabase.class, "database-name").allowMainThreadQueries().build();
@@ -74,30 +80,32 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.MyRowH
 
             messageText = itemView.findViewById(R.id.messageText);
             timeText = itemView.findViewById(R.id.timeText);
-            itemView.setOnClickListener(clk->{
-                int position = getAbsoluteAdapterPosition();
-                AlertDialog.Builder builder = new AlertDialog.Builder( context );
 
-                builder.setMessage("Do you want to delete the message: "+messageText.getText())
-                        .setTitle("Question:")
-                        .setNegativeButton("No", (dialog,cl)->{})
-                        .setPositiveButton("Yes", (dialog,cl)->{
-
-                            ChatMessage removedMessage = messages.get(position);
-                            mDAO.deleteMessage(removedMessage.id);//add to database;
-                            messages.remove(removedMessage);
-                            notifyItemRemoved(position);
-                            Snackbar.make(messageText,"You deleted message #"+position, Snackbar.LENGTH_LONG)
-                                    .setAction("Undo",click->{
-                                        messages.add(position, removedMessage);
-                                        notifyItemInserted(position);
-                                        mDAO.insertMessage(removedMessage);
-
-                                    })
-                                    .show();
-                        })
-                        .create().show();
-            });
+                itemView.setOnClickListener( click -> {
+                   int position = getAbsoluteAdapterPosition();
+                    ChatMessage selected = messages.get(position);
+                    chatRoomViewModel.selectedMessage.postValue(selected);
+         });
+//             builder.setMessage("Do you want to delete the message: "+messageText.getText())
+//                        .setTitle("Question:")
+//                        .setNegativeButton("No", (dialog,cl)->{})
+//                        .setPositiveButton("Yes", (dialog,cl)->{
+//
+//                            ChatMessage removedMessage = messages.get(position);
+//                            mDAO.deleteMessage(removedMessage.id);//add to database;
+//                            messages.remove(removedMessage);
+//                            notifyItemRemoved(position);
+//                            Snackbar.make(messageText,"You deleted message #"+position, Snackbar.LENGTH_LONG)
+//                                    .setAction("Undo",click->{
+//                                        messages.add(position, removedMessage);
+//                                        notifyItemInserted(position);
+//                                        mDAO.insertMessage(removedMessage);
+//
+//                                    })
+//                                    .show();
+//                        })
+//                        .create().show();
+            //});
         }
-    }
+   }
 }

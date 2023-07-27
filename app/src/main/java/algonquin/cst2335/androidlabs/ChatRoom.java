@@ -7,6 +7,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,6 +30,9 @@ public class ChatRoom extends AppCompatActivity {
     private ChatRoomAdapter adapter;
     private ArrayList<ChatMessage> messages;
     private ChatRoomViewModel chatRoomViewModel;
+    private FragmentManager fMgr = getSupportFragmentManager();
+    private FragmentTransaction tx = fMgr.beginTransaction();
+
 
 
     @Override
@@ -37,7 +42,6 @@ public class ChatRoom extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityChatRoomBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         chatRoomViewModel = new ViewModelProvider(this).get(ChatRoomViewModel.class);
         messages = chatRoomViewModel.messages.getValue();
         if (messages == null) {
@@ -58,7 +62,7 @@ public class ChatRoom extends AppCompatActivity {
         }
 
         binding.rvList.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ChatRoomAdapter(ChatRoom.this,messages);
+        adapter = new ChatRoomAdapter(ChatRoom.this,messages,chatRoomViewModel);
 
         binding.rvList.setAdapter(adapter);
 
@@ -87,7 +91,18 @@ public class ChatRoom extends AppCompatActivity {
                 adapter.notifyItemInserted(messages.size() - 1);
             }
         });
+        chatRoomViewModel.selectedMessage.observe(this, (newMessageValue) -> {
+
+
+            MessageDetailsFragment chatFragment = new MessageDetailsFragment(newMessageValue);
+            chatFragment.selected.getMessage();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentLocation, chatFragment)
+                    .commit();
+        });
     }
+
 
     private String getDateTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd-MMM-yyyy hh-mm-ss a");
