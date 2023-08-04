@@ -2,94 +2,169 @@ package algonquin.cst2335.androidlabs;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * MainActivity is the main activity of the password checker app.
- * @author Loveleen Loveleen
- * @version 1.0
- */
-public class MainActivity extends AppCompatActivity {
-    /**
-     * TextView to display the result
-     */
-     private TextView textView=null;
-/**
- * EditText to input the password.
- */
-private EditText editText=null;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.squareup.picasso.Picasso;
 
-/**
- * Button to initiate the password check.
- */
-private  Button button=null;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+
+public class MainActivity extends AppCompatActivity {
+    RequestQueue queue = null;
+
+    protected String cityName;
+    /**
+     * This hold the text at the centre of the screen
+     */
+    private TextView tv = null;
+
+    /**
+     * This holds the text as the password
+     */
+    EditText et = null;
+    /**
+     * tThis has login button which shows the error if anything is missing
+     */
+    Button btn = null;
+    TextView temp = null;
+    TextView maxtemp = null;
+    TextView mintemp = null;
+    TextView humidity = null;
+    ImageView icon = null;
+    TextView description = null;
+    private Bitmap image = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        queue = Volley.newRequestQueue(this);
         setContentView(R.layout.activity_main);
-         textView=findViewById(R.id.TextView);
-         editText=findViewById(R.id.EditText);
-        button=findViewById(R.id.button1);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String password = editText.getText().toString();
-                boolean isValidPassword=checkPasswordComplexity(password);
-                if(isValidPassword){
-                  textView.setText( "Your password meets the requirements");
-                }else{
-                   textView.setText("You shall not pass!");
-                }
+
+        tv = findViewById(R.id.textView);
+        et = findViewById(R.id.edittext);
+        btn = findViewById(R.id.button8);
+        temp = findViewById(R.id.temp);
+        maxtemp = findViewById(R.id.maxTemp);
+        mintemp = findViewById(R.id.minTemp);
+        humidity = findViewById(R.id.humidity);
+
+        icon = findViewById(R.id.icon);
+        description = findViewById(R.id.description);
+
+
+        btn.setOnClickListener(clk -> {
+            cityName = et.getText().toString();
+            String stringURL = null;
+            try {
+                stringURL = "https://api.openweathermap.org/data/2.5/weather?q=" + URLEncoder.encode(cityName, "UTF-8") + "&appid=f4165a9a06ccf01377462c4df2dea94e&units=metric";
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
             }
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, stringURL, null,
+                    (response) -> {
+                        try {
+                            JSONObject coord = response.getJSONObject("coord");
+                            // Extract "weather" JSON array and get the first element (position 0)
+                            JSONArray weatherArray = response.getJSONArray("weather");
+                            JSONObject position0 = weatherArray.getJSONObject(0);
+                            // Extract "description" and "icon" from the "weather" JSON object at position 0
+                            String descriptionValue = position0.getString("description");
+                            String iconName = position0.getString("icon");
+
+                            // Extract "main" JSON object
+                            JSONObject mainObject = response.getJSONObject("main");
+
+                            // Extract required values from "main" object
+                            double current = mainObject.getDouble("temp");
+                            double min = mainObject.getDouble("temp_min");
+                            double max = mainObject.getDouble("temp_max");
+                            int humidityValue = mainObject.getInt("humidity");
+
+
+                            // Construct the URL for the weather icon
+                            String imageUrl = "https://openweathermap.org/img/w/" + iconName + ".png";
+                            Log.e(">>>>", "Imageurl ::" + imageUrl);
+                            Picasso.get().load(imageUrl).into(icon);
+                            ImageRequest imgReq = new ImageRequest(imageUrl, new Response.Listener<Bitmap>() {
+                                @Override
+                                public void onResponse(Bitmap bitmap) {
+                                    // Do something with loaded bitmap...
+                                    //FileOutputStream fOut=null;
+                                    try {
+                                        image = bitmap;
+                                        image.compress(Bitmap.CompressFormat.PNG, 100, openFileOutput(iconName + ".png", Context.MODE_PRIVATE));
+                                        runOnUiThread(() -> {
+                                            temp.setText("The current temperature is " + current);
+                                            temp.setVisibility(View.VISIBLE);
+                                            maxtemp.setText("The min temperature is  " + min);
+                                            maxtemp.setVisibility(View.VISIBLE);
+                                            mintemp.setText("The maxtemp temperature is " + max);
+                                            mintemp.setVisibility(View.VISIBLE);
+                                            humidity.setText("The Humidity temperature is " + humidityValue + "%");
+                                            humidity.setVisibility(View.VISIBLE);
+                                            icon.setImageBitmap(image);
+                                            icon.setVisibility(View.VISIBLE);
+                                            description.setText(descriptionValue);
+                                            description.setVisibility(View.VISIBLE);
+                                        });
+                                    } catch (Exception e) {
+
+                                    }
+                                }
+                            }, 512, 512, ImageView.ScaleType.CENTER, null,
+                                    (error) -> {
+
+                                    });
+                            runOnUiThread(() -> {
+                                temp.setText("The current temperature is " + current);
+                                temp.setVisibility(View.VISIBLE);
+                                maxtemp.setText("The min temperature is  " + min);
+                                maxtemp.setVisibility(View.VISIBLE);
+                                mintemp.setText("The maxtemp temperature is " + max);
+                                mintemp.setVisibility(View.VISIBLE);
+                                humidity.setText("The Humidity temperature is " + humidityValue + "%");
+                                humidity.setVisibility(View.VISIBLE);
+                                icon.setImageBitmap(image);
+                                icon.setVisibility(View.VISIBLE);
+                                description.setText(descriptionValue);
+                                description.setVisibility(View.VISIBLE);
+                            });
+                            queue.add(imgReq);
+
+                        } catch (JSONException e) {
+                            throw new RuntimeException();
+                        }
+                    },
+
+                    (error) -> {
+                    });
+            queue.add(request);
+
         });
     }
-    /**
-     * Checks the complexity of the given password.
-     * @param password The password string to be checked.
-     * @return True if the password meets the complexity requirements, false otherwise.
-     */
-    boolean checkPasswordComplexity(String password){
-        boolean hasUpperCase = false;
-        boolean hasLowerCase = false;
-        boolean hasNumber = false;
-        boolean hasSpecialSymbol = false;
-        for (char c : password.toCharArray()) {
-            if (Character.isUpperCase(c)) {
-                hasUpperCase = true;
-            } else if (Character.isLowerCase(c)) {
-                hasLowerCase = true;
-            } else if (Character.isDigit(c)) {
-                hasNumber = true;
-            } else if ("#$%^&*!@?".contains(String.valueOf(c))) {
-                hasSpecialSymbol = true;
-            }
-        }
-        if (!hasUpperCase) {
-            showToast("Your password does not have an upper case letter");
-            return false;
-        } else if (!hasLowerCase) {
-            showToast("Your password does not have a lower case letter");
-            return false;
-        } else if (!hasNumber) {
-            showToast("Your password does not have a number");
-            return false;
-        } else if (!hasSpecialSymbol) {
-            showToast("Your password does not have a special symbol");
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private void showToast(String s) {
-        Toast.makeText(this,s,Toast.LENGTH_SHORT).show();
-    }
-
 }
-
